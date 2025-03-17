@@ -33,7 +33,7 @@ brave:
 
 # Claude API Settings
 claude:
-  model: "claude-instant-1.2"
+  model: "claude-3-sonnet-20240229"
   temperature: 0.2
   max_tokens: 4000
   timeout: 60
