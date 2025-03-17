@@ -1,0 +1,16 @@
+Smart Umbrella with Weather Prediction
+
+A smart umbrella that uses real-time weather data and machine learning to predict when rain is likely to occur. The umbrella automatically opens when rain is detected and the user is outdoors.
+
+Key features:
+- Integrated weather sensors and GPS
+- Machine learning algorithm for local weather prediction
+- Automatic opening mechanism
+- Bluetooth connectivity to smartphone app
+- Battery-powered with USB-C charging
+- LED lighting for nighttime visibility
+- Water-resistant electronics compartment
+
+The umbrella would connect to weather APIs for broader forecast data but would also use local sensors to detect immediate changes in humidity, barometric pressure, and temperature that might indicate imminent rainfall. The machine learning model would improve over time as it learns the local microclimate patterns specific to the user's common locations.
+
+When rain is detected and the user is moving (indicating they are outdoors), the umbrella would automatically open. The user can disable this feature through the companion smartphone app if desired. 

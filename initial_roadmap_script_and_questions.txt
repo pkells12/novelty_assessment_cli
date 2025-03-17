@@ -1,0 +1,34 @@
+(base) patrick@MDP-MD-SVS43531 ~ % cd code/claude/roadmap-generator 
+(base) patrick@MDP-MD-SVS43531 roadmap-generator % source venv/bin/activate
+(venv) (base) patrick@MDP-MD-SVS43531 roadmap-generator % python main.py save "A CLI app written in python that utilizes SerpApi to search google patents related to an idea and claude API performs novelty analysis against the users idea and the patents retrieved from google patents. The user should be able to input an idea into the command line, a local model (we can use ollama for this) will extract best/most relevant/appropriate keywords to perform the patent search, the results of the patent search and the users idea will then be sent to claude where the novelty analysis will be ran checking for things like: do the returned patents share unique qualities with the users idea, how similar are the patents to the users idea, and any other relevant things for the novelty analysis. Basically, we want to determine if the idea is worth pursuing or if someone has already thought up and implemented it. Also, let's implement the Brave search API to do web searches. These can also be sent to claude along with our patent results. Make sure both APIs are called and collected before sending the results of both to claude for analysis. Use the top 2 patents from the search results and the first 2 web pages from the Brave search. Patent search parameters should be US patents over the last 30 years." --output-file patent_search_cli.md
+Roadmap Generator v1.0.0
+Starting interactive roadmap generation process...
+✅ Initial roadmap generation complete!        
+✅ Customized questions generated!                             
+
+Based on the roadmap analysis, please answer these questions to help customize it further:
+(Press Enter to skip any question you don't know or don't care about)
+
+1. For the Ollama keyword extraction, would you prefer a focused approach that prioritizes technical terms and patent-friendly keywords, or a broader approach that captures more general aspects of the idea?
+   > Patent friendly keywords for best search results
+2. Beyond the 30-year timeframe and US patents requirement, are there specific patent classes, industries, or other filters you'd like to include in the SerpApi Google Patents search?
+   > no
+3. Should the Brave Search API focus on finding similar products/services in the market, or should it prioritize finding academic/technical literature related to the idea?
+   > already available products and services would be best to look for
+4. What specific novelty criteria are most important for your analysis (e.g., technical feasibility, market uniqueness, implementation approach)?
+   > The similarity to the idea and products or patents currently on the market should determine how novel the users idea is
+5. Which specific Ollama model would you like to use for keyword extraction? The roadmap mentions llama2 in the environment variables, but would you prefer a different model?
+   > llama2 is fine for now
+6. What format would you prefer for the final novelty analysis report (e.g., detailed technical analysis, executive summary with scores, comparison tables)?
+   > The user should be able to choose the level of scoring they receive (simple or complex) simple can be a quick breadown of the novelty analysis with a score 1-10 and the complex analysis can dive into the executive summary with scores and tables
+7. How long should search results be cached to balance API usage efficiency with data freshness?
+   > Please cache them for a week                                                                    
+8. Would you prefer API keys to be stored in environment variables, a configuration file, or input via CLI parameters?
+   > a .env file would be great
+9. In cases where an API fails (SerpApi or Brave Search), should the application continue with partial results or require all data sources to complete successfully?
+   > You can continue with partial results but make sure that the interface waits for a confirmed API failure before submitting results to claude for novelty analysis
+10. Are there specific operating systems or environments this CLI tool needs to support beyond standard platforms?
+   > Standard ones are fine. Make sure that the roadmap includes specific details of the software used along with specific versions of each software
+✅ Roadmap customization complete!                   
+
+Roadmap saved to roadmaps/patent_search_cli.md

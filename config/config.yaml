@@ -1,0 +1,50 @@
+# Application Settings
+app:
+  name: "Patent Novelty Analyzer"
+  version: "0.1.0"
+
+# API Keys (will be overridden by environment variables)
+api_keys:
+  serpapi: null
+  brave: null
+  anthropic: null
+
+# Ollama Settings
+ollama:
+  model: "llama2"
+  api_url: "http://localhost:11434/api"
+  temperature: 0.1
+  max_tokens: 1000
+  timeout: 30
+
+# SerpApi Settings
+serpapi:
+  engine: "google_patents"
+  results_limit: 2
+  patent_years: 30
+  country: "US"
+  timeout: 30
+
+# Brave Search Settings
+brave:
+  results_limit: 2
+  search_focus: "products_services"
+  timeout: 30
+
+# Claude API Settings
+claude:
+  model: "claude-3-opus-20240229"
+  temperature: 0.2
+  max_tokens: 4000
+  timeout: 60
+
+# Cache Settings
+cache:
+  enabled: true
+  duration_days: 7
+  location: ".cache"
+
+# Output Settings
+output:
+  simple_score_range: [1, 10]
+  formats: ["text", "markdown", "json"] 
