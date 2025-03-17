@@ -65,20 +65,23 @@ class ClaudeClient:
             self.validate_credentials()
             
             import anthropic
-            client = anthropic.Anthropic(api_key=self.api_key)
             
-            # Using the Messages API for Claude 3 models
-            messages = [{"role": "user", "content": user_prompt}]
+            # For anthropic 0.5.0, we need to use the completion API instead of messages
+            client = anthropic.Client(api_key=self.api_key)
             
-            response = client.messages.create(
-                model=self.model,
-                max_tokens=self.max_tokens,
+            # Format the prompt for the completions API
+            prompt = f"{anthropic.HUMAN_PROMPT} {user_prompt}{anthropic.AI_PROMPT}"
+            if system_prompt:
+                prompt = f"{system_prompt}\n\n{prompt}"
+            
+            response = client.completion(
+                prompt=prompt,
+                model="claude-instant-1.2",  # Using claude-instant-1.2 which is compatible with 0.5.0
+                max_tokens_to_sample=self.max_tokens,
                 temperature=self.temperature,
-                system=system_prompt,
-                messages=messages
             )
             
-            return response.content[0].text
+            return response.completion
             
         except anthropic.APIError as e:
             if "invalid_api_key" in str(e).lower() or "authentication" in str(e).lower():
