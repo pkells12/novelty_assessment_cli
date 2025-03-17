@@ -64,50 +64,80 @@ class ClaudeClient:
         try:
             self.validate_credentials()
             
-            # Use direct API call with requests instead of the anthropic library
-            headers = {
-                "x-api-key": self.api_key,
-                "anthropic-version": "2023-06-01",
-                "content-type": "application/json"
-            }
-            
-            # Prepare the request payload
-            payload = {
-                "model": self.model,
-                "max_tokens": self.max_tokens,
-                "temperature": self.temperature,
-                "messages": [{"role": "user", "content": user_prompt}]
-            }
-            
-            # Add system prompt if provided
-            if system_prompt:
-                payload["system"] = system_prompt
-            
-            # Make the API call directly
-            response = requests.post(
-                "https://api.anthropic.com/v1/messages",
-                headers=headers,
-                json=payload,
-                timeout=self.timeout
-            )
-            
-            # Check for errors
-            response.raise_for_status()
-            
-            # Parse response
-            response_data = response.json()
-            
-            # Return the content from the response
-            return response_data["content"][0]["text"]
+            # Use the Anthropic SDK instead of direct API calls
+            try:
+                import anthropic
+                client = anthropic.Anthropic(api_key=self.api_key)
+                
+                # Prepare messages
+                messages = [{"role": "user", "content": user_prompt}]
+                
+                # Make the API call
+                response = client.messages.create(
+                    model=self.model,
+                    max_tokens=self.max_tokens,
+                    temperature=self.temperature,
+                    messages=messages,
+                    system=system_prompt if system_prompt else None
+                )
+                
+                # Return the response content
+                return response.content[0].text
+                
+            except ImportError:
+                # Fall back to direct API calls if SDK not available
+                headers = {
+                    "x-api-key": self.api_key,
+                    "anthropic-version": "2023-06-01",
+                    "content-type": "application/json"
+                }
+                
+                # Prepare the request payload
+                payload = {
+                    "model": self.model,
+                    "max_tokens": self.max_tokens,
+                    "temperature": self.temperature,
+                    "messages": [{"role": "user", "content": user_prompt}]
+                }
+                
+                # Add system prompt if provided
+                if system_prompt:
+                    payload["system"] = system_prompt
+                
+                # Make the API call directly
+                response = requests.post(
+                    "https://api.anthropic.com/v1/messages",
+                    headers=headers,
+                    json=payload,
+                    timeout=self.timeout
+                )
+                
+                # Check for errors
+                response.raise_for_status()
+                
+                # Parse response
+                response_data = response.json()
+                
+                # Return the content from the response
+                return response_data["content"][0]["text"]
             
         except requests.exceptions.HTTPError as e:
-            if response.status_code == 401 or response.status_code == 403:
+            if hasattr(e, 'response') and e.response.status_code in (401, 403):
                 raise APIAuthenticationError(f"Claude API authentication error: {str(e)}")
             else:
                 raise APIConnectionError(f"Claude API HTTP error: {str(e)}")
                 
         except requests.exceptions.RequestException as e:
             raise APIConnectionError(f"Claude API request error: {str(e)}")
+        
+        except anthropic.AuthenticationError as e:
+            raise APIAuthenticationError(f"Claude API authentication error: {str(e)}")
+            
+        except anthropic.RateLimitError as e:
+            raise APIConnectionError(f"Claude API rate limit exceeded: {str(e)}")
+            
+        except anthropic.APIError as e:
+            raise APIConnectionError(f"Claude API error: {str(e)}")
                 
         except Exception as e:
             if isinstance(e, (APIConnectionError, APIAuthenticationError)):
