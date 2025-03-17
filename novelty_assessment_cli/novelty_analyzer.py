@@ -64,30 +64,50 @@ class ClaudeClient:
         try:
             self.validate_credentials()
             
-            import anthropic
+            # Use direct API call with requests instead of the anthropic library
+            headers = {
+                "x-api-key": self.api_key,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json"
+            }
             
-            # For anthropic 0.5.0, we need to use the completion API instead of messages
-            client = anthropic.Client(api_key=self.api_key)
+            # Prepare the request payload
+            payload = {
+                "model": self.model,
+                "max_tokens": self.max_tokens,
+                "temperature": self.temperature,
+                "messages": [{"role": "user", "content": user_prompt}]
+            }
             
-            # Format the prompt for the completions API
-            prompt = f"{anthropic.HUMAN_PROMPT} {user_prompt}{anthropic.AI_PROMPT}"
+            # Add system prompt if provided
             if system_prompt:
-                prompt = f"{system_prompt}\n\n{prompt}"
+                payload["system"] = system_prompt
             
-            response = client.complete(
-                prompt=prompt,
-                model="claude-instant-1.2",  # Using claude-instant-1.2 which is compatible with 0.5.0
-                max_tokens_to_sample=self.max_tokens,
-                temperature=self.temperature,
+            # Make the API call directly
+            response = requests.post(
+                "https://api.anthropic.com/v1/messages",
+                headers=headers,
+                json=payload,
+                timeout=self.timeout
             )
             
-            return response.completion
+            # Check for errors
+            response.raise_for_status()
             
-        except anthropic.APIError as e:
-            if "invalid_api_key" in str(e).lower() or "authentication" in str(e).lower():
-                raise APIAuthenticationError(f"Claude API error: {str(e)}")
+            # Parse response
+            response_data = response.json()
+            
+            # Return the content from the response
+            return response_data["content"][0]["text"]
+            
+        except requests.exceptions.HTTPError as e:
+            if response.status_code == 401 or response.status_code == 403:
+                raise APIAuthenticationError(f"Claude API authentication error: {str(e)}")
             else:
-                raise APIConnectionError(f"Claude API error: {str(e)}")
+                raise APIConnectionError(f"Claude API HTTP error: {str(e)}")
+                
+        except requests.exceptions.RequestException as e:
+            raise APIConnectionError(f"Claude API request error: {str(e)}")
                 
         except Exception as e:
             if isinstance(e, (APIConnectionError, APIAuthenticationError)):

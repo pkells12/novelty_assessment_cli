@@ -22,7 +22,7 @@ setup(
     install_requires=[
         "python-dotenv==1.0.0",
         "requests==2.31.0",
-        "anthropic==0.5.0",
+        "anthropic==0.7.4",
         "click==8.1.3",
         "rich==13.3.5",
         "pyyaml==6.0.1",
