@@ -74,7 +74,7 @@ class ClaudeClient:
             if system_prompt:
                 prompt = f"{system_prompt}\n\n{prompt}"
             
-            response = client.completion(
+            response = client.complete(
                 prompt=prompt,
                 model="claude-instant-1.2",  # Using claude-instant-1.2 which is compatible with 0.5.0
                 max_tokens_to_sample=self.max_tokens,
