@@ -170,7 +170,7 @@ class PatentAnalyzerCLI:
             return formatted_analysis
     
     def analyze(self, idea=None, idea_file=None, keywords=None, analysis_type="simple", 
-                output_format="text", output_file=None, verbose=False):
+                output_format="text", output_file=None, verbose=False, quiet=False):
         """Analyze a patent idea.
         
         Args:
@@ -181,6 +181,7 @@ class PatentAnalyzerCLI:
             output_format (str): Output format ("text", "markdown", or "json").
             output_file (str, optional): Path to save the analysis to.
             verbose (bool): Whether to show verbose output.
+            quiet (bool): Whether to suppress non-error output.
             
         Returns:
             str: Analysis results.
