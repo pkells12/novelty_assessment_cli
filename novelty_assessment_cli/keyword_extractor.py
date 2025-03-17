@@ -126,9 +126,9 @@ class KeywordExtractor:
             ollama_client: OllamaClient instance.
         """
         self.ollama_client = ollama_client
-        self.keyword_count = 10  # Extract more than needed, filter later
+        self.keyword_count = 20  # Extract more than needed, filter later
         self.PROMPT_TEMPLATE = """
-        You are tasked with extracting STRICTLY SEARCH KEYWORDS from a patent idea description. Extract exactly {keyword_count} specific keywords or short phrases that would be most effective for searching existing patents and products.
+        You are tasked with extracting STRICTLY SEARCH KEYWORDS from a patent idea description. Extract up to {keyword_count} specific keywords or short phrases that would be most effective for searching existing patents and products.
 
         IMPORTANT RULES:
         - Return ONLY the keywords as a comma-separated list
@@ -138,12 +138,13 @@ class KeywordExtractor:
         - NO conversational elements whatsoever
         - Keywords should be specific technical terms, not general descriptions
         - Focus on technical terms, functions, technologies, components
+        - If keywords are composed of multiple words, surround them with double quotes
 
         EXAMPLE BAD RESPONSE:
         Sure, here are some keywords: AI, dog collar, bark translation
 
         EXAMPLE GOOD RESPONSE:
-        AI translation, dog collar, bark recognition, pet wearable, voice synthesis, animal communication, speech processing, canine vocalizations, pet technology, language conversion
+        "AI translation", "dog collar", "bark recognition", "pet wearable", "voice synthesis", "animal communication", "speech processing", "canine vocalizations", "pet technology", "language conversion"
 
         Idea: {idea_text}
 
