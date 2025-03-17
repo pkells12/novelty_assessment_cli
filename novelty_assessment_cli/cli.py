@@ -9,6 +9,7 @@ import json
 from pathlib import Path
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
+from contextlib import contextmanager
 
 from novelty_assessment_cli.utils.error_handler import handle_exceptions, InputValidationError, APIConnectionError
 from novelty_assessment_cli.keyword_extractor import OllamaClient, KeywordExtractor
@@ -42,6 +43,23 @@ class PatentAnalyzerCLI:
         self.ollama_available = self.ollama_client.is_available()
         if not self.ollama_available:
             self.console.print("[yellow]Warning: Ollama is not available. Keyword extraction will use fallback method.[/yellow]")
+    
+    @contextmanager
+    def progress_indicator(self, message, disable=False):
+        """Display a progress indicator during a long-running operation.
+        
+        Args:
+            message (str): Message to display.
+            disable (bool): Whether to disable the indicator.
+        """
+        with Progress(
+            SpinnerColumn(),
+            TextColumn(f"[bold blue]{message}"),
+            transient=True,
+            disable=disable
+        ) as progress:
+            progress.add_task("Working...", total=None)
+            yield progress
     
     @handle_exceptions
     def run(self):
@@ -107,29 +125,15 @@ class PatentAnalyzerCLI:
             keywords = [kw.strip() for kw in keywords.split(",") if kw.strip()]
         
         # Search for patents
-        with Progress(
-            SpinnerColumn(),
-            TextColumn("[bold blue]Searching for patents..."),
-            transient=True,
-            disable=not verbose
-        ) as progress:
-            progress.start()
+        with self.progress_indicator("Searching for patents...", disable=not verbose):
             patents = self.patent_searcher.search_patents(keywords)
-            progress.stop()
         
         if verbose:
             self.console.print(f"Found {len(patents)} relevant patents.")
         
         # Search for existing products/services
-        with Progress(
-            SpinnerColumn(),
-            TextColumn("[bold blue]Searching for existing products/services..."),
-            transient=True,
-            disable=not verbose
-        ) as progress:
-            progress.start()
+        with self.progress_indicator("Searching for existing products/services...", disable=not verbose):
             web_results = self.web_searcher.search_web(keywords)
-            progress.stop()
         
         if verbose:
             self.console.print(f"Found {len(web_results)} relevant products/services.")
@@ -139,14 +143,7 @@ class PatentAnalyzerCLI:
         formatted_web_results = self.web_searcher.format_web_results(web_results)
         
         # Generate novelty analysis
-        with Progress(
-            SpinnerColumn(),
-            TextColumn("[bold blue]Generating novelty analysis..."),
-            transient=True,
-            disable=not verbose
-        ) as progress:
-            progress.start()
-            
+        with self.progress_indicator("Generating novelty analysis...", disable=not verbose):
             if analysis_type == "complex":
                 analysis = self.novelty_analyzer.generate_complex_analysis(
                     idea, formatted_patents, formatted_web_results, output_format
@@ -161,8 +158,6 @@ class PatentAnalyzerCLI:
                 formatted_analysis = self.novelty_analyzer.format_simple_analysis(
                     analysis, output_format
                 )
-                
-            progress.stop()
         
         if output_format == "json":
             return json.dumps(formatted_analysis, indent=2)
@@ -189,39 +184,36 @@ class PatentAnalyzerCLI:
         # Get the idea text
         idea_text = self._get_idea_text(idea, idea_file)
         
-        self.console.print("Analyzing patent idea")
-        self.console.print(f"{idea_text[:100]}{'...' if len(idea_text) > 100 else ''}")
+        if not quiet:
+            self.console.print("Analyzing patent idea")
+            self.console.print(f"{idea_text[:100]}{'...' if len(idea_text) > 100 else ''}")
         
         # Extract keywords if not provided
         if not keywords:
-            with Progress(
-                SpinnerColumn(),
-                TextColumn("[bold blue]Extracting keywords..."),
-                transient=True,
-                disable=not verbose
-            ) as progress:
-                progress.start()
+            with self.progress_indicator("Extracting keywords...", disable=quiet):
                 extracted_keywords = self.keyword_extractor.extract_keywords(idea_text)
-                progress.stop()
             
             keywords = extracted_keywords
         
-        self.console.print(f"Extracted keywords: {keywords}")
+        if not quiet:
+            self.console.print(f"Extracted keywords: {keywords}")
         
         # Perform analysis
         try:
-            analysis = self._perform_analysis(
-                idea_text, 
-                keywords, 
-                analysis_type, 
-                output_format, 
-                verbose
-            )
+            with self.progress_indicator("Analyzing patent novelty...", disable=quiet):
+                analysis = self._perform_analysis(
+                    idea_text, 
+                    keywords, 
+                    analysis_type, 
+                    output_format, 
+                    verbose
+                )
             
             # Save to file if requested
             if output_file:
                 Path(output_file).write_text(analysis)
-                self.console.print(f"Analysis saved to {output_file}")
+                if not quiet:
+                    self.console.print(f"Analysis saved to {output_file}")
             
             return analysis
         except Exception as e:
@@ -245,12 +237,7 @@ class PatentAnalyzerCLI:
         
         # Extract keywords
         try:
-            with Progress(
-                SpinnerColumn(),
-                TextColumn("[progress.description]{task.description}"),
-                console=self.console
-            ) as progress:
-                progress.add_task("Extracting keywords...", total=None)
+            with self.progress_indicator("Extracting keywords...", disable=False):
                 extracted_keywords = self._extract_keywords(idea_text)
             
             # Show extracted keywords
@@ -325,12 +312,7 @@ class PatentAnalyzerCLI:
         
         # Otherwise, extract keywords using Ollama
         try:
-            with Progress(
-                SpinnerColumn(),
-                TextColumn("[progress.description]{task.description}"),
-                console=self.console
-            ) as progress:
-                progress.add_task("Extracting keywords...", total=None)
+            with self.progress_indicator("Extracting keywords using Ollama..."):
                 return self.keyword_extractor.extract_keywords(idea_text)
         except APIConnectionError as e:
             self.console.print(f"[bold red]Error extracting keywords:[/bold red] {str(e)}")

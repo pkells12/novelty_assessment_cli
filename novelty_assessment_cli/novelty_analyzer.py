@@ -67,17 +67,19 @@ class ClaudeClient:
             import anthropic
             client = anthropic.Anthropic(api_key=self.api_key)
             
-            messages = [{"role": "user", "content": user_prompt}]
+            # For anthropic==0.5.0, we need to use the completion API instead of messages
+            prompt = f"{anthropic.HUMAN_PROMPT} {user_prompt}{anthropic.AI_PROMPT}"
+            if system_prompt:
+                prompt = f"{system_prompt}\n\n{prompt}"
             
-            response = client.messages.create(
+            response = client.completions.create(
+                prompt=prompt,
                 model=self.model,
-                max_tokens=self.max_tokens,
+                max_tokens_to_sample=self.max_tokens,
                 temperature=self.temperature,
-                system=system_prompt,
-                messages=messages
             )
             
-            return response.content[0].text
+            return response.completion
             
         except anthropic.APIError as e:
             if "invalid_api_key" in str(e).lower() or "authentication" in str(e).lower():
