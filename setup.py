@@ -4,14 +4,14 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="patent-novelty-analyzer",
+    name="novelty-assessment-cli",
     version="0.1.0",
     author="",
     author_email="",
-    description="A CLI tool for analyzing patent novelty against existing patents and products",
+    description="A CLI tool for analyzing the novelty of ideas against existing patents and products",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="",
+    url="https://github.com/pkells12/novelty_assessment_cli",
     packages=find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
@@ -20,6 +20,8 @@ setup(
     ],
     python_requires=">=3.10",
     install_requires=[
+        "setuptools>=65.0.0",
+        "wheel>=0.38.0",
         "python-dotenv==1.0.0",
         "requests==2.31.0",
         "anthropic==0.5.0",
@@ -31,7 +33,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "patent-novelty-analyzer=src.__main__:main",
+            "novelty-assessment-cli=src.__main__:main",
         ],
     },
 ) 
