@@ -5,30 +5,27 @@ A CLI tool to analyze patent novelty by comparing against existing patents and p
 ## Features
 
 - Extract keywords from patent ideas using Ollama (local LLM)
-- Search for existing patents using Google Patents via SerpApi (coming soon)
-- Search for existing products using Brave Search API (coming soon)
-- Analyze novelty using Claude 3 Opus (coming soon)
+- Search for existing patents using Google Patents via SerpApi
+- Search for existing products using Brave Search API
+- Analyze novelty using Claude 3 Opus
 - Output in text, markdown, or JSON format
-
-## Current Implementation Status
-
-- ✅ Phase 1: Environment Setup and Project Structure
-- ✅ Phase 2: Implementing Local Model Integration (Ollama)
-- 🔄 Phase 3: Implementing SerpApi Google Patents Integration (in progress)
-- ⏳ Phase 4: Implementing Brave Search API Integration (planned)
-- ⏳ Phase 5: Implementing Claude API Integration (planned)
-- ⏳ Phase 6: Building the CLI Interface (partially implemented)
-- ⏳ Phase 7: Error Handling and Resilience (partially implemented)
-- ⏳ Phase 8: Performance Optimization (planned)
-- ⏳ Phase 9: Final Testing and Documentation (planned)
 
 ## Installation
 
 1. Ensure you have Python 3.10+ installed
 2. Clone this repository
-3. Install requirements:
+3. Create and activate a virtual environment:
+```
+python -m venv .venv
+source .venv/bin/activate  # On Windows, use: .venv\Scripts\activate
+```
+4. Install requirements:
 ```
 pip install -r requirements.txt
+```
+5. Or install as a package (recommended):
+```
+pip install -e .
 ```
 
 ## Configuration
@@ -52,18 +49,18 @@ ollama pull llama2
 ### Basic Analysis
 
 ```
-python -m src analyze "My patent idea description"
+patent-novelty-analyzer analyze "My patent idea description"
 ```
 
 You can also provide keywords directly:
 ```
-python -m src analyze "My patent idea description" --keywords "keyword1, keyword2, keyword3"
+patent-novelty-analyzer analyze "My patent idea description" --keywords "keyword1, keyword2, keyword3"
 ```
 
 ### Interactive Mode
 
 ```
-python -m src interactive
+patent-novelty-analyzer interactive
 ```
 
 ### Options
