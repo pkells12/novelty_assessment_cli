@@ -2,8 +2,8 @@
 Main entry point for Patent Novelty Analyzer.
 """
 
-from src.cli import PatentAnalyzerCLI
-from src.utils.config import ConfigLoader
+from .cli import PatentAnalyzerCLI
+from .utils.config import ConfigLoader
 
 
 def main():

@@ -10,11 +10,11 @@ from pathlib import Path
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
-from src.utils.error_handler import handle_exceptions, InputValidationError, APIConnectionError
-from src.keyword_extractor import OllamaClient, KeywordExtractor
-from src.patent_searcher import PatentSearcher, SerpApiClient
-from src.web_searcher import WebSearcher, BraveSearchClient
-from src.novelty_analyzer import NoveltyAnalyzer, ClaudeClient
+from novelty_assessment_cli.utils.error_handler import handle_exceptions, InputValidationError, APIConnectionError
+from novelty_assessment_cli.keyword_extractor import OllamaClient, KeywordExtractor
+from novelty_assessment_cli.patent_searcher import PatentSearcher, SerpApiClient
+from novelty_assessment_cli.web_searcher import WebSearcher, BraveSearchClient
+from novelty_assessment_cli.novelty_analyzer import NoveltyAnalyzer, ClaudeClient
 
 
 class PatentAnalyzerCLI:

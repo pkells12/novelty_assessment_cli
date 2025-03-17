@@ -4,9 +4,13 @@ Novelty analysis using Claude API.
 
 import os
 import json
+import requests
+from requests.exceptions import RequestException
+from typing import List, Dict, Any, Optional
+import time
 from tenacity import retry, stop_after_attempt, wait_exponential
 
-from src.utils.error_handler import APIConnectionError, APIAuthenticationError
+from novelty_assessment_cli.utils.error_handler import APIConnectionError, APIAuthenticationError
 
 
 class ClaudeClient:

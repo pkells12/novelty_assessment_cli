@@ -1,13 +1,16 @@
 """
-Keyword extraction using Ollama.
+This module handles the extraction of relevant keywords from a patent idea.
 """
 
+import os
+import re
+import time
 import json
 import requests
+from requests.exceptions import RequestException
 from tenacity import retry, stop_after_attempt, wait_exponential
-import re
 
-from src.utils.error_handler import APIConnectionError, APIAuthenticationError
+from novelty_assessment_cli.utils.error_handler import APIConnectionError, APIAuthenticationError
 
 # Common words to filter out
 COMMON_WORDS = {

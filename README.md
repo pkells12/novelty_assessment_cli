@@ -1,6 +1,6 @@
-# Novelty Assessment CLI
+# Patent Novelty Analyzer
 
-A CLI tool to analyze the novelty of ideas by comparing against existing patents and products.
+A CLI tool to analyze patent novelty by comparing against existing patents and products.
 
 ## Features
 
@@ -10,16 +10,23 @@ A CLI tool to analyze the novelty of ideas by comparing against existing patents
 - Analyze novelty using Claude 3 Opus (coming soon)
 - Output in text, markdown, or JSON format
 
+## Current Implementation Status
+
+- ✅ Phase 1: Environment Setup and Project Structure
+- ✅ Phase 2: Implementing Local Model Integration (Ollama)
+- 🔄 Phase 3: Implementing SerpApi Google Patents Integration (in progress)
+- ⏳ Phase 4: Implementing Brave Search API Integration (planned)
+- ⏳ Phase 5: Implementing Claude API Integration (planned)
+- ⏳ Phase 6: Building the CLI Interface (partially implemented)
+- ⏳ Phase 7: Error Handling and Resilience (partially implemented)
+- ⏳ Phase 8: Performance Optimization (planned)
+- ⏳ Phase 9: Final Testing and Documentation (planned)
+
 ## Installation
 
 1. Ensure you have Python 3.10+ installed
 2. Clone this repository
-3. Create a virtual environment:
-```
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-4. Install requirements:
+3. Install requirements:
 ```
 pip install -r requirements.txt
 ```

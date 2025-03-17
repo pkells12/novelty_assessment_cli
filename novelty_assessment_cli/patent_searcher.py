@@ -2,11 +2,15 @@
 Patent search functionality using SerpApi.
 """
 
+import os
 import json
+import time
+import requests
+from requests.exceptions import RequestException
 from tenacity import retry, stop_after_attempt, wait_exponential
 from serpapi import GoogleSearch
 
-from src.utils.error_handler import APIConnectionError, APIAuthenticationError
+from novelty_assessment_cli.utils.error_handler import APIConnectionError, APIAuthenticationError
 
 
 class SerpApiClient:
