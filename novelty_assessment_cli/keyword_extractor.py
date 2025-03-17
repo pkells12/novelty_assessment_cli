@@ -128,17 +128,22 @@ class KeywordExtractor:
         self.ollama_client = ollama_client
         self.keyword_count = 10  # Extract more than needed, filter later
         self.PROMPT_TEMPLATE = """
-        You are an expert patent search consultant. Given an idea description, extract {keyword_count} keywords that would be most effective for searching patents and existing products.
+        You are tasked with extracting STRICTLY SEARCH KEYWORDS from a patent idea description. Extract exactly {keyword_count} specific keywords or short phrases that would be most effective for searching existing patents and products.
 
-        Focus on:
-        - Technical terms relevant to the domain
-        - Functional descriptions of the innovation
-        - Potential application areas
-        - Technologies or methods involved
-        - Components or materials mentioned
+        IMPORTANT RULES:
+        - Return ONLY the keywords as a comma-separated list
+        - Each keyword must be 1-4 words maximum
+        - DO NOT include any explanatory text, confirmations, or conversation
+        - NO phrases like "sure", "okay", "alright", "first", "next", etc.
+        - NO conversational elements whatsoever
+        - Keywords should be specific technical terms, not general descriptions
+        - Focus on technical terms, functions, technologies, components
 
-        Do NOT include common words or generic terms.
-        Format output as a comma-separated list.
+        EXAMPLE BAD RESPONSE:
+        Sure, here are some keywords: AI, dog collar, bark translation
+
+        EXAMPLE GOOD RESPONSE:
+        AI translation, dog collar, bark recognition, pet wearable, voice synthesis, animal communication, speech processing, canine vocalizations, pet technology, language conversion
 
         Idea: {idea_text}
 
@@ -192,17 +197,31 @@ class KeywordExtractor:
         # Extract keywords section
         if not completion:
             return []
-            
+        
+        # Strip any explanatory text that might precede the actual keywords
+        # Find the last occurrence of "Keywords:" if it exists
+        if "Keywords:" in completion:
+            completion = completion.split("Keywords:")[-1].strip()
+        
+        # Remove any common conversational prefixes
+        prefixes = [
+            "Here are", "I've extracted", "Based on", "These are", "The following",
+            "Sure", "Okay", "Alright", "Here is", "Looking at"
+        ]
+        for prefix in prefixes:
+            if completion.startswith(prefix):
+                completion = completion[len(prefix):].strip()
+                # Remove any colons or similar that might follow
+                if completion.startswith(":") or completion.startswith(",") or completion.startswith("."):
+                    completion = completion[1:].strip()
+        
         # Try different parsing approaches
         keywords = []
         
-        # Look for comma-separated list
+        # Look for comma-separated list (most likely format)
         if "," in completion:
-            # Extract only what appears to be the comma-separated list
-            for line in completion.split("\n"):
-                if "," in line and not line.startswith("#") and not line.startswith("*"):
-                    parts = [p.strip() for p in line.split(",")]
-                    keywords.extend([p for p in parts if p and len(p) < 50])  # Skip empty or very long items
+            parts = [p.strip() for p in completion.split(",")]
+            keywords.extend([p for p in parts if p and len(p) < 50])  # Skip empty or very long items
         
         # If that fails, look for numbered list (1. keyword, 2. keyword)
         if not keywords:
@@ -216,20 +235,30 @@ class KeywordExtractor:
         
         # If still empty, extract potential keywords using NLP-like heuristics
         if not keywords:
-            # Split by spaces and take words that might be keywords
+            # Fall back to word extraction but avoid conversational words
             words = completion.split()
             for word in words:
                 word = word.strip().lower()
-                if (word and len(word) > 3 and len(word) < 20 and 
-                    word not in COMMON_WORDS and 
-                    not any(c.isdigit() for c in word)):
+                if (len(word) > 3 and  # Skip very short words
+                    word not in COMMON_WORDS and  # Skip common words
+                    not word.startswith(('i ', 'we ', 'you ', 'they ')) and  # Skip pronouns
+                    not any(c in word for c in ',.;:!?()[]{}"\'') and  # Skip punctuation
+                    not word.startswith(("sure", "okay", "alright", "first", "next"))):  # Skip conversational starters
                     keywords.append(word)
         
-        # Limit to the expected number of keywords
-        if len(keywords) > self.keyword_count:
-            keywords = keywords[:self.keyword_count]
-            
-        return keywords
+        # Filter out low-quality keywords
+        filtered_keywords = []
+        conversational_words = ["sure", "okay", "alright", "first", "next", "here", "think", 
+                               "would", "could", "should", "able", "please", "thanks"]
+        
+        for keyword in keywords:
+            # Skip conversational words and very short keywords
+            if (keyword.lower() not in conversational_words and 
+                len(keyword) > 2 and 
+                not keyword.lower().startswith(tuple(conversational_words))):
+                filtered_keywords.append(keyword)
+        
+        return filtered_keywords
     
     def _extract_keywords_fallback(self, idea_text):
         """Extract keywords using a fallback method when Ollama is not available.
